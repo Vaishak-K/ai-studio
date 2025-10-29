@@ -67,8 +67,9 @@ export default function GenerationHistory({
           <button
             key={gen.id}
             onClick={() => onRestore(gen)}
-            className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all text-left"
+            className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:shadow-md transition-all text-left group"
           >
+            {/* UPDATED: Show generated image thumbnail */}
             <div className="relative w-24 h-24 flex-shrink-0">
               <Image
                 src={`http://localhost:3001${gen.image_url}`}
@@ -76,6 +77,21 @@ export default function GenerationHistory({
                 fill
                 className="object-cover rounded-lg"
               />
+              <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </div>
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-gray-900 truncate">{gen.prompt}</p>

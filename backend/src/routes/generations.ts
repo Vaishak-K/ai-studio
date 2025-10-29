@@ -43,7 +43,7 @@ router.post(
       if (!req.file) {
         return res.status(400).json({ error: "No image provided" });
       }
-      console.log("Request Body:", req.body);
+
       const { prompt, style } = generationSchema.parse(req.body);
 
       // Simulate 20% error rate
@@ -58,28 +58,50 @@ router.post(
         setTimeout(resolve, 1000 + Math.random() * 1000)
       );
 
-      // Process and save image
       const generationId = uuidv4();
-      const filename = `${generationId}.jpg`;
-      const filepath = path.join(uploadsDir, filename);
 
-      // Resize image if needed (max 1920px width)
+      // ✅ CHANGE 1: Save ORIGINAL uploaded image
+      const originalFilename = `original-${generationId}.jpg`;
+      const originalFilepath = path.join(uploadsDir, originalFilename);
+
       await sharp(req.file.buffer)
         .resize(1920, null, { withoutEnlargement: true, fit: "inside" })
         .jpeg({ quality: 90 })
-        .toFile(filepath);
+        .toFile(originalFilepath);
 
-      // Save to database
-      const imageUrl = `/uploads/${filename}`;
+      // ✅ CHANGE 2: Save "generated" image (in real app, this would be AI output)
+      // For demo, we use the same image but could apply filters/modifications
+      const generatedFilename = `${generationId}.jpg`;
+      const generatedFilepath = path.join(uploadsDir, generatedFilename);
+
+      await sharp(req.file.buffer)
+        .resize(1920, null, { withoutEnlargement: true, fit: "inside" })
+        .jpeg({ quality: 90 })
+        .toFile(generatedFilepath);
+
+      // ✅ CHANGE 3: Save BOTH URLs to database
+      const imageUrl = `/uploads/${generatedFilename}`;
+      const originalImageUrl = `/uploads/${originalFilename}`;
+
       db.prepare(
-        "INSERT INTO generations (id, user_id, prompt, style, image_url, status) VALUES (?, ?, ?, ?, ?, ?)"
-      ).run(generationId, req.userId!, prompt, style, imageUrl, "completed");
-      // console.log("Image URL:", imageUrl);
+        "INSERT INTO generations (id, user_id, prompt, style, image_url, original_image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      ).run(
+        generationId,
+        req.userId!,
+        prompt,
+        style,
+        imageUrl,
+        originalImageUrl,
+        "completed"
+      );
+
+      // ✅ CHANGE 4: Return BOTH URLs in response
       res.status(201).json({
         id: generationId,
         prompt,
         style,
         imageUrl,
+        originalImageUrl, // ← NEW: Return this too
         status: "completed",
         createdAt: new Date().toISOString(),
       });

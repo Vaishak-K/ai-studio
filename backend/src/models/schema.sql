@@ -6,20 +6,20 @@ CREATE TABLE IF NOT EXISTS users (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+
 CREATE TABLE IF NOT EXISTS generations (
-  id TEXT PRIMARY KEY, 
+  id TEXT PRIMARY KEY,
   user_id INTEGER NOT NULL,
   prompt TEXT NOT NULL,
   style TEXT NOT NULL,
   image_url TEXT NOT NULL,
-  original_image_url TEXT,
+  original_image_url TEXT NOT NULL,
   status TEXT DEFAULT 'completed',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-
-CREATE INDEX IF NOT EXISTS idx_generations_user_id ON generations(user_id);
-
-
-CREATE INDEX IF NOT EXISTS idx_generations_created_at ON generations(created_at DESC);
+-- Indexes for better query performance
+CREATE INDEX idx_generations_user_id ON generations(user_id);
+CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
+CREATE INDEX idx_users_email ON users(email);

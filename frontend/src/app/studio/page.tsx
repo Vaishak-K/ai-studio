@@ -17,6 +17,7 @@ export default function StudioPage() {
     useGenerate();
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [restoredImageUrl, setRestoredImageUrl] = useState<string | null>(null); // ADDED
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState<(typeof STYLES)[number]>("realistic");
   const [refreshHistory, setRefreshHistory] = useState(0);
@@ -34,12 +35,16 @@ export default function StudioPage() {
     const result = await generate({ image: selectedImage, prompt, style });
     if (result) {
       setRefreshHistory((prev) => prev + 1);
+      setRestoredImageUrl(null); // Clear restored image after new generation
     }
   };
 
-  const handleRestore = (generation: Generation) => {
+  // UPDATED: Restore generation including image
+  const handleRestore = (generation: any) => {
     setPrompt(generation.prompt);
+
     setStyle(generation.style as (typeof STYLES)[number]);
+    setRestoredImageUrl(generation.original_image_url); // ADDED: Restore original image
   };
 
   if (authLoading) {
@@ -74,6 +79,7 @@ export default function StudioPage() {
                 <ImageUpload
                   onImageSelect={setSelectedImage}
                   selectedImage={selectedImage}
+                  restoredImageUrl={restoredImageUrl} // ADDED
                 />
 
                 <div>

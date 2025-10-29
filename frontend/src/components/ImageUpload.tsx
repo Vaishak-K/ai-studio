@@ -1,19 +1,44 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 interface ImageUploadProps {
-  onImageSelect: (file: File) => void;
+  onImageSelect: (file: File | null) => void;
   selectedImage: File | null;
+  restoredImageUrl?: string | null; // ADDED: For restoring from history
 }
 
 export default function ImageUpload({
   onImageSelect,
   selectedImage,
+  restoredImageUrl,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ADDED: Handle restored image URL
+  useEffect(() => {
+    if (restoredImageUrl) {
+      setPreview(`http://localhost:3001${restoredImageUrl}`);
+      // Convert URL to File object
+      fetchImageAsFile(restoredImageUrl);
+    }
+  }, [restoredImageUrl]);
+
+  // ADDED: Fetch image from URL and convert to File
+  const fetchImageAsFile = async (imageUrl: string) => {
+    try {
+      const response = await fetch(`http://localhost:3001${imageUrl}`);
+      const blob = await response.blob();
+      const filename = imageUrl.split("/").pop() || "restored-image.jpg";
+      console.log("Filename:", filename);
+      const file = new File([blob], filename, { type: blob.type });
+      onImageSelect(file);
+    } catch (error) {
+      console.error("Error loading restored image:", error);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,27 +63,62 @@ export default function ImageUpload({
     reader.readAsDataURL(file);
   };
 
+  const handleClear = () => {
+    setPreview(null);
+    onImageSelect(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700">
-        Upload Image
-      </label>
+      <div className="flex items-center justify-between">
+        <label className="block text-sm font-medium text-gray-700">
+          Upload Image
+        </label>
+        {preview && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="text-sm text-red-600 hover:text-red-700"
+          >
+            Clear
+          </button>
+        )}
+      </div>
 
       <div
-        onClick={() => fileInputRef.current?.click()}
-        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary-500 transition-colors"
+        onClick={() => !preview && fileInputRef.current?.click()}
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          preview
+            ? "border-green-300 bg-green-50"
+            : "border-gray-300 hover:border-primary-500 cursor-pointer"
+        }`}
         role="button"
         tabIndex={0}
         aria-label="Upload image"
       >
         {preview ? (
-          <div className="relative w-full h-64">
-            <Image
-              src={preview}
-              alt="Preview"
-              fill
-              className="object-contain rounded-lg"
-            />
+          <div className="space-y-4">
+            <div className="relative w-full h-64">
+              <Image
+                src={preview}
+                alt="Preview"
+                fill
+                className="object-contain rounded-lg"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Change Image
+            </button>
           </div>
         ) : (
           <div className="space-y-2">

@@ -35,6 +35,7 @@ export interface Generation {
   prompt: string;
   style: string;
   imageUrl: string;
+  originalImageUrl: string;
   status: string;
   createdAt: string;
 }
@@ -56,7 +57,6 @@ export const generationsAPI = {
       headers: { "Content-Type": "multipart/form-data" },
       signal,
     });
-    console.log("Return Data:", data);
     return data;
   },
   getRecent: async (limit = 5) => {
