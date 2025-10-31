@@ -10,7 +10,10 @@
     "copy-assets": "copyfiles -u 1 \"src/**/*.sql\" dist/",
     "test": "jest --runInBand",
     "test:coverage": "jest --coverage --runInBand",
-    "test:watch": "jest --watch --runInBand"
+    "test:watch": "jest --watch --runInBand",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [],
   "author": "",

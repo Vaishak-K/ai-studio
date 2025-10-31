@@ -1,23 +1,18 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export interface AuthRequest extends Request {
   userId?: number;
 }
 
-export const authMiddleware = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-      res.status(401).json({ error: "No token provided" });
+      res.status(401).json({ error: 'No token provided' });
       return;
     }
 
@@ -25,11 +20,11 @@ export const authMiddleware = (
     req.userId = decoded.userId;
     next();
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: 'Invalid token' });
     return;
   }
 };
 
 export const generateToken = (userId: number): string => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
 };

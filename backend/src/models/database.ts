@@ -1,9 +1,9 @@
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
-const dbPath = path.join(__dirname, "../../data/database.sqlite");
-const schemaPath = path.join(__dirname, "./schema.sql");
+const dbPath = path.join(__dirname, '../../data/database.sqlite');
+const schemaPath = path.join(__dirname, './schema.sql');
 
 // Ensure data directory exists
 const dataDir = path.dirname(dbPath);
@@ -14,7 +14,7 @@ if (!fs.existsSync(dataDir)) {
 export const db: Database.Database = new Database(dbPath);
 
 // Initialize schema
-const schema = fs.readFileSync(schemaPath, "utf-8");
+const schema = fs.readFileSync(schemaPath, 'utf-8');
 db.exec(schema);
 
 export default db;
