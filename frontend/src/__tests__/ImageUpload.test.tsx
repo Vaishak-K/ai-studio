@@ -13,7 +13,13 @@ describe("ImageUpload", () => {
     const mockOnSelect = jest.fn();
     render(<ImageUpload onImageSelect={mockOnSelect} selectedImage={null} />);
 
-    expect(screen.getByText(/click to upload/i)).toBeInTheDocument();
+    // Updated to match the new UI text
+    expect(screen.getByText(/upload your image/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/drag and drop or click to browse/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/png, jpg/i)).toBeInTheDocument();
+    expect(screen.getByText(/max 10mb/i)).toBeInTheDocument();
   });
 
   it("handles file selection", () => {
@@ -50,6 +56,7 @@ describe("ImageUpload", () => {
     fireEvent.change(input, { target: { files: [largeFile] } });
 
     expect(alertSpy).toHaveBeenCalledWith("File size must be less than 10MB");
+    expect(mockOnSelect).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
 
@@ -71,6 +78,7 @@ describe("ImageUpload", () => {
     expect(alertSpy).toHaveBeenCalledWith(
       "Only JPEG and PNG files are allowed"
     );
+    expect(mockOnSelect).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
 
@@ -90,5 +98,102 @@ describe("ImageUpload", () => {
     await waitFor(() => {
       expect(screen.getByAltText("Preview")).toBeInTheDocument();
     });
+  });
+
+  it("shows clear button when image is uploaded", async () => {
+    const mockOnSelect = jest.fn();
+    const { container } = render(
+      <ImageUpload onImageSelect={mockOnSelect} selectedImage={null} />
+    );
+
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/clear/i)).toBeInTheDocument();
+    });
+  });
+
+  it("clears image when clear button is clicked", async () => {
+    const mockOnSelect = jest.fn();
+    const { container } = render(
+      <ImageUpload onImageSelect={mockOnSelect} selectedImage={null} />
+    );
+
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByAltText("Preview")).toBeInTheDocument();
+    });
+
+    const clearButton = screen.getByText(/clear/i);
+    fireEvent.click(clearButton);
+
+    await waitFor(() => {
+      expect(screen.queryByAltText("Preview")).not.toBeInTheDocument();
+      expect(mockOnSelect).toHaveBeenCalledWith(null);
+    });
+  });
+
+  it("shows change image button when preview is displayed", async () => {
+    const mockOnSelect = jest.fn();
+    const { container } = render(
+      <ImageUpload onImageSelect={mockOnSelect} selectedImage={null} />
+    );
+
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/change image/i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows ready badge when image is uploaded", async () => {
+    const mockOnSelect = jest.fn();
+    const { container } = render(
+      <ImageUpload onImageSelect={mockOnSelect} selectedImage={null} />
+    );
+
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    const input = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/ready/i)).toBeInTheDocument();
+    });
+  });
+
+  it("handles drag and drop", async () => {
+    const mockOnSelect = jest.fn();
+    render(<ImageUpload onImageSelect={mockOnSelect} selectedImage={null} />);
+
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    const dropZone = screen.getByRole("button", { name: /upload image/i });
+
+    fireEvent.dragOver(dropZone);
+    fireEvent.drop(dropZone, {
+      dataTransfer: {
+        files: [file],
+      },
+    });
+
+    expect(mockOnSelect).toHaveBeenCalledWith(file);
   });
 });

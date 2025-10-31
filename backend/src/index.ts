@@ -3,6 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import authRoutes from './routes/auth';
 import generationsRoutes from './routes/generations';
+import { errorHandler } from './middleware/errorHandler';
+import { logger } from './utils/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,7 +12,14 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Request logging
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path}`);
+  next();
+});
 
 // Routes
 app.use('/auth', authRoutes);
@@ -20,14 +29,28 @@ app.use('/generations', generationsRoutes);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-app.get('/', () => {
-  console.log('Running');
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
-// Only start server if not in test environment
+// Error handler (must be last)
+app.use(errorHandler);
+
+// Start server only if not in test mode
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  const server = app.listen(PORT, () => {
+    logger.info(`🚀 Server running on http://localhost:${PORT}`);
+  });
+
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM received, closing server...');
+    server.close(() => {
+      logger.info('Server closed');
+      process.exit(0);
+    });
   });
 }
 
