@@ -19,6 +19,7 @@
 | ESLint + Prettier configured      | ✅          | .eslintrc.js, .prettierrc                        |
 | Input validation (zod)            | ✅          | /backend/src/routes/\*.ts                        |
 | Responsive design                 | ✅          | All components with Tailwind                     |
+| Docker setup                      | ✅          | /docker-compose.yml                              |
 | Accessibility (ARIA, keyboard)    | ✅          | All components                                   |
 | Loading states                    | ✅          | /frontend/app/studio/page.tsx                    |
 | Error handling                    | ✅          | All components                                   |

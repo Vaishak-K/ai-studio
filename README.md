@@ -1,6 +1,6 @@
 # AI Studio
 
-A full-stack web application for AI-powered fashion image generation, built with Next.js 16, Node.js, and TypeScript.
+A full-stack web application for AI-powered fashion image generation, built with Next.js 15, Node.js, and TypeScript.
 
 ## 🚀 Features
 
@@ -101,14 +101,31 @@ npm test
 npm run test:coverage
 ```
 
-E2E tests
+### E2E tests
 
 ```bash
 cd tests
 npx playwright test
 ```
 
-📁 Project Structure
+### 🐳 Docker (Optional)
+
+```bash
+# Start everything
+docker compose up --build
+
+# Stop everything
+docker compose down
+
+# Stop and remove volumes (careful - deletes data!)
+docker compose down -v
+
+# View running containers
+docker compose ps
+
+```
+
+## 📁 Project Structure
 
 ```text
 
