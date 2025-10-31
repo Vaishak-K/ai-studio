@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     // Disable optimization locally (so localhost images work)
     unoptimized: true,
