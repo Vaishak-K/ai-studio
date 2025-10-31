@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { generationsAPI, Generation } from "@/lib/api";
 import { AxiosError } from "axios";
 import axios from "axios";
+
 interface GenerateParams {
   image: File;
   prompt: string;
@@ -58,7 +59,6 @@ export const useGenerate = () => {
       const isRetryable = axiosError.response?.data?.retryable || false;
 
       if (isRetryable && attemptNumber < 3) {
-        // Exponential backoff: 1s, 2s, 4s
         const delay = Math.pow(2, attemptNumber) * 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
         return generate(params, attemptNumber + 1);
@@ -74,6 +74,8 @@ export const useGenerate = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+      setError("Generation cancelled");
+      setIsGenerating(false);
     }
   };
 

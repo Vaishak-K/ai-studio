@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGenerate } from "@/hooks/useGenerate";
 import ImageUpload from "@/components/ImageUpload";
 import GenerationHistory from "@/components/GenerationHistory";
-import { Generation } from "@/lib/api";
 
 const STYLES = ["realistic", "artistic", "anime", "sketch"] as const;
 
@@ -17,11 +16,12 @@ export default function StudioPage() {
     useGenerate();
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [restoredImageUrl, setRestoredImageUrl] = useState<string | null>(null); // ADDED
+  const [restoredImageUrl, setRestoredImageUrl] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState<(typeof STYLES)[number]>("realistic");
   const [refreshHistory, setRefreshHistory] = useState(0);
 
+  // Single redirect effect
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push("/login");
@@ -34,25 +34,35 @@ export default function StudioPage() {
 
     const result = await generate({ image: selectedImage, prompt, style });
     if (result) {
+      setPrompt("");
+      setStyle("realistic");
+      setSelectedImage(null);
       setRefreshHistory((prev) => prev + 1);
-      setRestoredImageUrl(null); // Clear restored image after new generation
+      setRestoredImageUrl(null);
     }
   };
 
-  // UPDATED: Restore generation including image
   const handleRestore = (generation: any) => {
     setPrompt(generation.prompt);
-
     setStyle(generation.style as (typeof STYLES)[number]);
-    setRestoredImageUrl(generation.original_image_url); // ADDED: Restore original image
+    setRestoredImageUrl(generation.original_image_url);
   };
 
+  // Show loading while checking auth
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
   }
 
   return (
@@ -63,7 +73,7 @@ export default function StudioPage() {
           <h1 className="text-2xl font-bold text-gray-900">🎨 AI Studio</h1>
           <button
             onClick={logout}
-            className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
+            className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition"
           >
             Logout
           </button>
@@ -79,7 +89,7 @@ export default function StudioPage() {
                 <ImageUpload
                   onImageSelect={setSelectedImage}
                   selectedImage={selectedImage}
-                  restoredImageUrl={restoredImageUrl} // ADDED
+                  restoredImageUrl={restoredImageUrl}
                 />
 
                 <div>
@@ -96,7 +106,8 @@ export default function StudioPage() {
                     required
                     rows={3}
                     maxLength={500}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                    disabled={isGenerating}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="Describe what you want to generate..."
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -117,7 +128,8 @@ export default function StudioPage() {
                     onChange={(e) =>
                       setStyle(e.target.value as (typeof STYLES)[number])
                     }
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent capitalize"
+                    disabled={isGenerating}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent capitalize disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {STYLES.map((s) => (
                       <option key={s} value={s} className="capitalize">
@@ -152,8 +164,21 @@ export default function StudioPage() {
                 )}
 
                 {result && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                    ✓ Generation completed successfully!
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 flex-shrink-0"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="font-medium">
+                      Generation completed successfully!
+                    </span>
                   </div>
                 )}
 

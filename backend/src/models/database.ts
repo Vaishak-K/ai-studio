@@ -11,7 +11,7 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-export const db = new Database(dbPath);
+export const db: Database.Database = new Database(dbPath);
 
 // Initialize schema
 const schema = fs.readFileSync(schemaPath, "utf-8");

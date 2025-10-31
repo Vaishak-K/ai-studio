@@ -4,8 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc && npm run copy-assets",
+    "start": "node dist/index.js",
+    "copy-assets": "copyfiles -u 1 \"src/**/*.sql\" dist/",
+    "test": "jest --runInBand",
+    "test:coverage": "jest --coverage --runInBand",
+    "test:watch": "jest --watch --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -22,10 +27,11 @@
     "sharp": "^0.34.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "uuid": "^13.0.0",
+    "uuid": "^8.3.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
     "@types/bcrypt": "^6.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.19",
@@ -33,10 +39,13 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/supertest": "^6.0.3",
+    "@types/uuid": "^10.0.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^9.38.0",
     "jest": "^30.2.0",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.5"
+    "ts-jest": "^29.4.5",
+    "ts-node-dev": "^2.0.0"
   }
 }

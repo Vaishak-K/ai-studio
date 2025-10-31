@@ -15,7 +15,7 @@ export default function GenerationHistory({
 }: GenerationHistoryProps) {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
   useEffect(() => {
     loadGenerations();
   }, [refreshTrigger]);
@@ -72,7 +72,7 @@ export default function GenerationHistory({
             {/* UPDATED: Show generated image thumbnail */}
             <div className="relative w-24 h-24 flex-shrink-0">
               <Image
-                src={`http://localhost:3001${gen.image_url}`}
+                src={`${url}${gen.image_url}`}
                 alt={gen.prompt}
                 fill
                 className="object-cover rounded-lg"

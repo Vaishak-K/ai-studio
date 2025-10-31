@@ -6,7 +6,7 @@ import Image from "next/image";
 interface ImageUploadProps {
   onImageSelect: (file: File | null) => void;
   selectedImage: File | null;
-  restoredImageUrl?: string | null; // ADDED: For restoring from history
+  restoredImageUrl?: string | null;
 }
 
 export default function ImageUpload({
@@ -16,20 +16,30 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-  // ADDED: Handle restored image URL
+  // ADDED: Clear preview when selectedImage is reset to null
+  useEffect(() => {
+    if (selectedImage === null) {
+      setPreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }, [selectedImage]);
+
+  // Handle restored image URL
   useEffect(() => {
     if (restoredImageUrl) {
-      setPreview(`http://localhost:3001${restoredImageUrl}`);
-      // Convert URL to File object
+      setPreview(`${url}${restoredImageUrl}`);
       fetchImageAsFile(restoredImageUrl);
     }
   }, [restoredImageUrl]);
 
-  // ADDED: Fetch image from URL and convert to File
+  // Fetch image from URL and convert to File
   const fetchImageAsFile = async (imageUrl: string) => {
     try {
-      const response = await fetch(`http://localhost:3001${imageUrl}`);
+      const response = await fetch(`${url}${imageUrl}`);
       const blob = await response.blob();
       const filename = imageUrl.split("/").pop() || "restored-image.jpg";
       console.log("Filename:", filename);

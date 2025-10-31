@@ -64,6 +64,20 @@ body {
     background-position: 1000px 0;
   }
 }
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
@@ -92,4 +106,13 @@ body {
 
 @utility text-balance {
   text-wrap: balance;
+}
+@utility blur-xs {
+  filter: blur(2px);
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }

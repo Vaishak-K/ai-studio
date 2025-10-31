@@ -20,6 +20,6 @@ CREATE TABLE IF NOT EXISTS generations (
 );
 
 -- Indexes for better query performance
-CREATE INDEX idx_generations_user_id ON generations(user_id);
-CREATE INDEX idx_generations_created_at ON generations(created_at DESC);
-CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_generations_user_id ON generations(user_id);
+CREATE INDEX IF NOT EXISTS idx_generations_created_at ON generations(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
